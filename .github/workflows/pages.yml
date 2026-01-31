@@ -31,7 +31,7 @@ jobs:
         run: |
           rm -rf public
           mkdir -p public
-          cp -R index.html robot-calculator.html "Robot List" public/
+          cp -R index.html robot-calculator.html "Robot List" "02-机器人数量测算表241011V2.2.xlsx" public/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
