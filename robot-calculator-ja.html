@@ -69,11 +69,10 @@
         }
 
         .info-tooltip {
-            position: relative;
+            position: static;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            z-index: 30;
         }
 
         .info-tooltip-inline {
@@ -81,6 +80,7 @@
         }
 
         .tooltip-trigger {
+            position: relative;
             width: 18px;
             height: 18px;
             border-radius: 50%;
@@ -95,6 +95,7 @@
             cursor: help;
             padding: 0;
             line-height: 1;
+            flex-shrink: 0;
         }
 
         .tooltip-trigger:focus-visible {
@@ -104,9 +105,7 @@
         }
 
         .tooltip-content {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
+            position: fixed;
             min-width: 220px;
             max-width: 320px;
             padding: 10px 12px;
@@ -119,8 +118,11 @@
             line-height: 1.5;
             white-space: normal;
             word-break: break-word;
-            z-index: 40;
-            display: none;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
         }
 
         .tooltip-content strong {
@@ -129,7 +131,8 @@
 
         .info-tooltip:hover .tooltip-content,
         .info-tooltip:focus-within .tooltip-content {
-            display: block;
+            opacity: 1;
+            visibility: visible;
         }
 
         .version-tag {
@@ -2202,7 +2205,78 @@
 
             // Initial scroll indicator update
             setTimeout(updateScrollIndicators, 100);
+
+            // Tooltip positioning system
+            initTooltips();
         });
+
+        // Initialize tooltip positioning
+        function initTooltips() {
+            document.addEventListener('mouseenter', function(e) {
+                const trigger = e.target.closest('.tooltip-trigger');
+                if (!trigger) return;
+                
+                const tooltip = trigger.closest('.info-tooltip');
+                if (!tooltip) return;
+                
+                const content = tooltip.querySelector('.tooltip-content');
+                if (!content) return;
+                
+                positionTooltip(trigger, content);
+            }, true);
+
+            document.addEventListener('focusin', function(e) {
+                const trigger = e.target.closest('.tooltip-trigger');
+                if (!trigger) return;
+                
+                const tooltip = trigger.closest('.info-tooltip');
+                if (!tooltip) return;
+                
+                const content = tooltip.querySelector('.tooltip-content');
+                if (!content) return;
+                
+                positionTooltip(trigger, content);
+            }, true);
+        }
+
+        // Position tooltip to avoid viewport overflow
+        function positionTooltip(trigger, content) {
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const tooltipWidth = Math.min(320, viewportWidth - 20);
+            const gap = 8;
+
+            // Calculate initial position (below trigger, left-aligned)
+            let top = triggerRect.bottom + gap;
+            let left = triggerRect.left;
+
+            // Check right boundary - if tooltip would overflow right, align to right edge
+            if (left + tooltipWidth > viewportWidth - 10) {
+                left = viewportWidth - tooltipWidth - 10;
+            }
+
+            // Check left boundary
+            if (left < 10) {
+                left = 10;
+            }
+
+            // Check bottom boundary - if tooltip would overflow bottom, show above
+            content.style.maxWidth = tooltipWidth + 'px';
+            const contentHeight = content.offsetHeight || 100;
+            
+            if (top + contentHeight > viewportHeight - 10) {
+                top = triggerRect.top - contentHeight - gap;
+            }
+
+            // If still overflowing top, just place at top with some margin
+            if (top < 10) {
+                top = 10;
+            }
+
+            content.style.top = top + 'px';
+            content.style.left = left + 'px';
+        }
 
         // Close modal on outside click
         document.getElementById('editModal').addEventListener('click', function(e) {
