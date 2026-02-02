@@ -62,132 +62,71 @@
             opacity: 0.85;
         }
 
-        .manual-tooltip {
-            display: inline-flex;
-            position: relative;
-            margin-top: 16px;
-            justify-content: center;
+        .header-note {
+            margin-top: 12px;
+            font-size: 13px;
+            opacity: 0.85;
         }
 
-        .manual-tooltip-trigger {
+        .info-tooltip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-tooltip-inline {
+            margin-left: 6px;
+        }
+
+        .tooltip-trigger {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.65);
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
+            cursor: help;
+            padding: 0;
+            line-height: 1;
         }
 
-        .manual-tooltip-trigger:hover,
-        .manual-tooltip-trigger:focus-visible {
-            background: rgba(255, 255, 255, 0.28);
-            transform: translateY(-1px);
+        .tooltip-trigger:focus-visible {
             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(78, 125, 247, 0.2);
         }
 
-        .manual-tooltip-content {
+        .tooltip-content {
             position: absolute;
-            top: calc(100% + 12px);
-            right: 0;
-            width: min(760px, 92vw);
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 20px 22px;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 220px;
+            max-width: 320px;
+            padding: 10px 12px;
             background: #fff;
-            color: var(--text-primary);
-            border-radius: 16px;
+            color: var(--text-secondary);
             border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-lg);
-            text-align: left;
-            z-index: 10;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            font-size: 12px;
+            line-height: 1.5;
+            z-index: 20;
             display: none;
         }
 
-        .manual-tooltip:hover .manual-tooltip-content,
-        .manual-tooltip:focus-within .manual-tooltip-content {
-            display: block;
-        }
-
-        .manual-tooltip-content h2 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .manual-tooltip-content h3 {
-            font-size: 15px;
-            margin: 16px 0 8px;
-            color: var(--primary-dark);
-        }
-
-        .manual-tooltip-content p {
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        .manual-tooltip-content ul {
-            padding-left: 18px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            font-size: 13px;
-        }
-
-        .manual-tooltip-content li {
-            margin-bottom: 6px;
-        }
-
-        .manual-tooltip-content .manual-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .manual-tooltip-content .manual-table th,
-        .manual-tooltip-content .manual-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border-color);
-            text-align: left;
-            vertical-align: top;
-        }
-
-        .manual-tooltip-content .manual-table th {
-            background: #f9fafb;
+        .tooltip-content strong {
             color: var(--text-primary);
-            font-weight: 600;
         }
 
-        .manual-tooltip-content .manual-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .manual-tooltip-content .manual-note {
-            background: #f8fafc;
-            border-left: 4px solid var(--primary-color);
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 12.5px;
-            margin-bottom: 12px;
-        }
-
-        .manual-tooltip-content .manual-formula {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            background: #f3f4f6;
-            padding: 2px 6px;
-            border-radius: 6px;
-            color: #111827;
+        .info-tooltip:hover .tooltip-content,
+        .info-tooltip:focus-within .tooltip-content {
+            display: block;
         }
 
         .version-tag {
@@ -216,6 +155,10 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .section-title .info-tooltip {
+            font-weight: 500;
         }
 
         .section-icon {
@@ -635,6 +578,16 @@
             border-bottom: 2px solid var(--primary-color);
         }
 
+        .flow-table th .info-tooltip,
+        .result-table th .info-tooltip {
+            align-items: center;
+        }
+
+        .flow-table th .tooltip-content,
+        .result-table th .tooltip-content {
+            min-width: 200px;
+        }
+
         .flow-table th small {
             display: block;
             font-weight: normal;
@@ -977,164 +930,7 @@
     <header class="header">
         <h1>ロボット台数算定システム</h1>
         <p class="header-desc">自律フォークリフトロボット効率算定ツール</p>
-        <div class="manual-tooltip">
-            <button class="manual-tooltip-trigger" type="button" aria-haspopup="true">
-                マニュアル
-            </button>
-            <div class="manual-tooltip-content" role="tooltip">
-                <h2>営業向け マニュアル（日本語）</h2>
-                <p>日本語版のロボット台数算定システムで入力・計算する項目の意味と計算式をまとめています。提案資料の根拠として、そのまま転記できます。</p>
-
-                <h3>1. 使い方の流れ</h3>
-                <ul>
-                    <li>トップから「日本語版」を開き、搬送フローを追加します。</li>
-                    <li>各フローのパラメータ（タクト、距離、速度など）を入力します。</li>
-                    <li>車種カードを選択し、必要ならパラメータ編集で車両条件や充放比を調整します。</li>
-                    <li>計算結果（推奨台数・稼働率・充電台数）を提案資料に反映します。</li>
-                </ul>
-
-                <h3>2. 入力パラメータ（搬送フロー）</h3>
-                <table class="manual-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 180px;">項目</th>
-                            <th>意味／入力の目安</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>搬送フロー（起点→終点）</td>
-                            <td>フロー名や工程間ルート。例：A→B。</td>
-                        </tr>
-                        <tr>
-                            <td>搬送品</td>
-                            <td>搬送する物品の名称（パレット、部材など）。</td>
-                        </tr>
-                        <tr>
-                            <td>搬送タクト（パレット/往復/h）</td>
-                            <td>1時間あたりの要求搬送量。理論台数の基準になります。</td>
-                        </tr>
-                        <tr>
-                            <td>荷役回数</td>
-                            <td>1往復での荷役回数（ピック・置き回数）。</td>
-                        </tr>
-                        <tr>
-                            <td>揚程（m）</td>
-                            <td>上下動の高さ。1m以下は1mとして計算、1m超過分のみ加算。</td>
-                        </tr>
-                        <tr>
-                            <td>パレット認識</td>
-                            <td>パレット検出が必要な場合にON。ピック時に認識時間を加算します。</td>
-                        </tr>
-                        <tr>
-                            <td>搬送距離（m/往復）</td>
-                            <td>往復距離を入力。走行時間の基準になります。</td>
-                        </tr>
-                        <tr>
-                            <td>平均速度（m/s）</td>
-                            <td>実運用の平均速度（空荷・満載を考慮して設定）。</td>
-                        </tr>
-                        <tr>
-                            <td>旋回回数</td>
-                            <td>往復での旋回回数。旋回時間の算定に使用。</td>
-                        </tr>
-                        <tr>
-                            <td>設備連携（回）</td>
-                            <td>自動ドア・コンベヤ・エレベータ等との連携回数。</td>
-                        </tr>
-                        <tr>
-                            <td>交通制御時間（s）</td>
-                            <td>交通管制や待機などの追加時間。現場実績を反映。</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>3. 車種パラメータ（選択カード）</h3>
-                <table class="manual-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 180px;">項目</th>
-                            <th>意味／用途</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>定格荷重・揚程</td>
-                            <td>車両スペックの基準値。仕様書ベースで編集可能。</td>
-                        </tr>
-                        <tr>
-                            <td>速度（空荷/満載）</td>
-                            <td>平均速度の設定根拠。現場想定に合わせて平均速度へ反映。</td>
-                        </tr>
-                        <tr>
-                            <td>充放比（1:X）</td>
-                            <td>稼働中充電モードで使用。Xが大きいほど必要充電台数が増えます。</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>4. 計算式パラメータ（編集ダイアログ）</h3>
-                <table class="manual-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 180px;">項目</th>
-                            <th>意味／初期値</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>荷役時間（秒/回）</td>
-                            <td>1回あたりのピック／置き時間。初期値：20秒。</td>
-                        </tr>
-                        <tr>
-                            <td>工程通信（秒/回）</td>
-                            <td>RDSなどとの通信時間。初期値：5秒。</td>
-                        </tr>
-                        <tr>
-                            <td>パレット認識（秒）</td>
-                            <td>認識処理の固定時間。初期値：15秒。</td>
-                        </tr>
-                        <tr>
-                            <td>旋回時間（秒/回）</td>
-                            <td>1回の旋回にかかる時間。初期値：5秒。</td>
-                        </tr>
-                        <tr>
-                            <td>設備連携（秒/回）</td>
-                            <td>自動ドアやコンベヤ連携の時間。初期値：10秒。</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <h3>5. 算定ロジック（主要式）</h3>
-                <ul>
-                    <li>荷役時間：<span class="manual-formula">荷役回数 × 荷役時間(秒/回)</span></li>
-                    <li>揚程時間：<span class="manual-formula">((揚程 - 1m) ÷ 0.1m/s) × 2 × 荷役回数</span>（揚程 ≤1m は0秒）</li>
-                    <li>工程通信：<span class="manual-formula">荷役回数 × 工程通信(秒/回)</span></li>
-                    <li>パレット認識：<span class="manual-formula">ON時のみ パレット認識(秒)</span></li>
-                    <li>走行時間：<span class="manual-formula">搬送距離 ÷ 平均速度</span></li>
-                    <li>旋回時間：<span class="manual-formula">旋回回数 × 旋回時間(秒/回)</span></li>
-                    <li>設備連携：<span class="manual-formula">設備連携回数 × 設備連携(秒/回)</span></li>
-                    <li>交通制御時間：<span class="manual-formula">入力値（秒）</span></li>
-                    <li>作業時間：上記の合計</li>
-                    <li>搬送能力：<span class="manual-formula">3600 ÷ 作業時間</span>（パレット/時）</li>
-                    <li>理論台数：<span class="manual-formula">搬送タクト ÷ 搬送能力</span></li>
-                </ul>
-                <div class="manual-note">
-                    推奨投入は各フローの理論台数比率で配分します（<span class="manual-formula">理論台数 ÷ 総理論台数 × 推奨投入</span>を切り上げ）。
-                </div>
-
-                <h3>6. 充電モードと稼働率</h3>
-                <ul>
-                    <li>稼働中充電ON：<span class="manual-formula">充電台数 = 理論台数 ÷ 充放比</span>、<span class="manual-formula">推奨投入 = ceil(理論台数 + 充電台数)</span></li>
-                    <li>稼働中充電ON：<span class="manual-formula">稼働率 = 理論台数 ÷ (推奨投入 - 充電台数) × 100%</span></li>
-                    <li>稼働中充電OFF：<span class="manual-formula">充電台数 = 0</span>、<span class="manual-formula">推奨投入 = ceil(理論台数)</span></li>
-                    <li>稼働中充電OFF：<span class="manual-formula">稼働率 = 理論台数 ÷ 推奨投入 × 100%</span></li>
-                </ul>
-                <div class="manual-note">
-                    自動算出の稼働率が90%を超える場合、推奨投入ロボット台数は手動で編集可能になります。
-                </div>
-            </div>
-        </div>
+        <p class="header-note">各項目の「i」にカーソルを合わせると、営業向けの説明が表示されます。</p>
     </header>
 
     <div class="container">
@@ -1150,6 +946,12 @@
                     </svg>
                 </span>
                 ステップ1：搬送フローを入力
+                <span class="info-tooltip info-tooltip-inline">
+                    <button class="tooltip-trigger" type="button" aria-label="搬送フロー入力の説明">i</button>
+                    <span class="tooltip-content">
+                        <strong>使い方の流れ：</strong>搬送フローを追加し、タクト・距離・速度などを入力します。入力値が理論台数の算定基準になります。
+                    </span>
+                </span>
             </h2>
 
             <div class="flow-table-container">
@@ -1157,17 +959,92 @@
                     <thead>
                         <tr>
                             <th>No.</th>
-                            <th>搬送フロー<small>起点→終点</small></th>
-                            <th>搬送品</th>
-                            <th>搬送タクト<small>パレット/往復/h</small></th>
-                            <th>荷役回数<small>回</small></th>
-                            <th>揚程<small>m</small></th>
-                            <th>パレット認識</th>
-                            <th>搬送距離<small>m（往復）</small></th>
-                            <th>平均速度<small>m/s</small></th>
-                            <th>旋回回数<small>回</small></th>
-                            <th>設備連携<small>回</small></th>
-                            <th>交通制御時間<small>s</small></th>
+                            <th>
+                                <span class="info-tooltip">
+                                    搬送フロー
+                                    <button class="tooltip-trigger" type="button" aria-label="搬送フローの説明">i</button>
+                                    <span class="tooltip-content">フロー名や工程間ルートを記入します（例：A→B）。</span>
+                                </span>
+                                <small>起点→終点</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    搬送品
+                                    <button class="tooltip-trigger" type="button" aria-label="搬送品の説明">i</button>
+                                    <span class="tooltip-content">搬送する物品の名称（パレット、部材など）。</span>
+                                </span>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    搬送タクト
+                                    <button class="tooltip-trigger" type="button" aria-label="搬送タクトの説明">i</button>
+                                    <span class="tooltip-content">1時間あたりの要求搬送量。理論台数の基準になります。</span>
+                                </span>
+                                <small>パレット/往復/h</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    荷役回数
+                                    <button class="tooltip-trigger" type="button" aria-label="荷役回数の説明">i</button>
+                                    <span class="tooltip-content">1往復での荷役回数（ピック・置き回数）。</span>
+                                </span>
+                                <small>回</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    揚程
+                                    <button class="tooltip-trigger" type="button" aria-label="揚程の説明">i</button>
+                                    <span class="tooltip-content">上下動の高さ。1m以下は1mとして計算し、1m超過分のみ加算します。</span>
+                                </span>
+                                <small>m</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    パレット認識
+                                    <button class="tooltip-trigger" type="button" aria-label="パレット認識の説明">i</button>
+                                    <span class="tooltip-content">パレット検出が必要な場合にON。ピック時に認識時間を加算します。</span>
+                                </span>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    搬送距離
+                                    <button class="tooltip-trigger" type="button" aria-label="搬送距離の説明">i</button>
+                                    <span class="tooltip-content">往復距離を入力。走行時間の基準になります。</span>
+                                </span>
+                                <small>m（往復）</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    平均速度
+                                    <button class="tooltip-trigger" type="button" aria-label="平均速度の説明">i</button>
+                                    <span class="tooltip-content">実運用の平均速度（空荷・満載を考慮して設定）。</span>
+                                </span>
+                                <small>m/s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    旋回回数
+                                    <button class="tooltip-trigger" type="button" aria-label="旋回回数の説明">i</button>
+                                    <span class="tooltip-content">往復での旋回回数。旋回時間の算定に使用します。</span>
+                                </span>
+                                <small>回</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    設備連携
+                                    <button class="tooltip-trigger" type="button" aria-label="設備連携回数の説明">i</button>
+                                    <span class="tooltip-content">自動ドア・コンベヤ・エレベータ等との連携回数。</span>
+                                </span>
+                                <small>回</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    交通制御時間
+                                    <button class="tooltip-trigger" type="button" aria-label="交通制御時間の説明">i</button>
+                                    <span class="tooltip-content">交通管制や待機などの追加時間。現場実績を反映します。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -1177,20 +1054,26 @@
             </div>
 
             <div class="action-row">
-                <button class="btn btn-primary" onclick="addFlowRow()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    フローを追加
-                </button>
-                <button class="btn btn-secondary" onclick="clearAllRows()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"/>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    </svg>
-                    すべてクリア
-                </button>
+                <span class="info-tooltip">
+                    <button class="btn btn-primary" onclick="addFlowRow()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        フローを追加
+                    </button>
+                    <span class="tooltip-content">新しい搬送フロー行を追加します。必要なフロー数だけ追加してください。</span>
+                </span>
+                <span class="info-tooltip">
+                    <button class="btn btn-secondary" onclick="clearAllRows()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        すべてクリア
+                    </button>
+                    <span class="tooltip-content">全フローの入力内容を削除して初期状態に戻します。</span>
+                </span>
             </div>
         </section>
 
@@ -1207,6 +1090,12 @@
                     </svg>
                 </span>
                 ステップ2：車種を選択（編集ボタンでパラメータを変更）
+                <span class="info-tooltip info-tooltip-inline">
+                    <button class="tooltip-trigger" type="button" aria-label="車種選択の説明">i</button>
+                    <span class="tooltip-content">
+                        車種カードを選択し、必要に応じて編集ボタンで車両スペックや充放比を調整します。
+                    </span>
+                </span>
             </h2>
 
             <div class="search-container">
@@ -1214,7 +1103,13 @@
                     <circle cx="11" cy="11" r="8"/>
                     <path d="M21 21l-4.35-4.35"/>
                 </svg>
-                <input type="text" class="search-input" id="robotSearch" placeholder="型式またはタイプを検索...">
+                <span class="info-tooltip" style="width: 100%;">
+                    <input type="text" class="search-input" id="robotSearch" placeholder="型式またはタイプを検索...">
+                    <button class="tooltip-trigger" type="button" aria-label="検索の説明" style="position: absolute; right: 44px; top: 50%; transform: translateY(-50%);">
+                        i
+                    </button>
+                    <span class="tooltip-content" style="right: 0; left: auto;">型式名またはタイプ名で車種カードを絞り込みできます。</span>
+                </span>
                 <button class="search-clear" id="searchClear" onclick="clearSearch()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"/>
@@ -1250,12 +1145,19 @@
                         </svg>
                     </span>
                     ステップ3：効率算定結果
-                    <button class="edit-btn" onclick="openFormulaModal()" title="計算式パラメータ編集" style="position: relative; top: 0; right: 0; margin-left: 12px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                    </button>
+                    <span class="info-tooltip info-tooltip-inline">
+                        <button class="tooltip-trigger" type="button" aria-label="算定結果の説明">i</button>
+                        <span class="tooltip-content">各フローの入力内容から作業時間・搬送能力・理論台数を算出し、推奨投入台数へ反映します。</span>
+                    </span>
+                    <span class="info-tooltip info-tooltip-inline">
+                        <button class="edit-btn" onclick="openFormulaModal()" title="計算式パラメータ編集" style="position: relative; top: 0; right: 0; margin-left: 12px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <span class="tooltip-content">荷役・通信・旋回などの標準時間（初期値）を編集します。</span>
+                    </span>
                 </h2>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     <label class="form-label" style="display: inline-flex; align-items: center; gap: 8px; margin: 0;">
@@ -1264,13 +1166,28 @@
                             <input type="checkbox" id="workCharging" onchange="calculateAll()">
                             <span class="toggle-slider"></span>
                         </label>
+                        <span class="info-tooltip info-tooltip-inline">
+                            <button class="tooltip-trigger" type="button" aria-label="稼働中充電の説明">i</button>
+                            <span class="tooltip-content">
+                                ON時は<strong>充電台数 = 理論台数 ÷ 充放比</strong>を加算し推奨投入を計算します。OFF時は充電台数=0で算定します。
+                            </span>
+                        </span>
                     </label>
                 </div>
             </div>
 
             <div class="result-grid" id="resultSummary">
                 <div class="result-card highlight">
-                    <div class="result-card-title">推奨投入ロボット台数 <span id="editableHint" style="font-size: 11px; color: var(--warning-color); display: none;">（編集可）</span></div>
+                    <div class="result-card-title">
+                        推奨投入ロボット台数
+                        <span class="info-tooltip info-tooltip-inline">
+                            <button class="tooltip-trigger" type="button" aria-label="推奨投入ロボット台数の説明">i</button>
+                            <span class="tooltip-content">
+                                理論台数と充電台数を考慮して算出。稼働率が90%を超える場合は手動編集が可能になります。
+                            </span>
+                        </span>
+                        <span id="editableHint" style="font-size: 11px; color: var(--warning-color); display: none;">（編集可）</span>
+                    </div>
                     <div class="result-card-value">
                         <input type="number" id="totalRobots" value="0" min="1" step="1"
                                class="result-input" readonly
@@ -1279,21 +1196,39 @@
                     </div>
                 </div>
                 <div class="result-card">
-                    <div class="result-card-title">総搬送能力</div>
+                    <div class="result-card-title">
+                        総搬送能力
+                        <span class="info-tooltip info-tooltip-inline">
+                            <button class="tooltip-trigger" type="button" aria-label="総搬送能力の説明">i</button>
+                            <span class="tooltip-content">各フローの搬送能力（3600 ÷ 作業時間）を合算した値です。</span>
+                        </span>
+                    </div>
                     <div class="result-card-value">
                         <span id="totalCapacity">0</span>
                         <span class="result-card-unit">パレット/h</span>
                     </div>
                 </div>
                 <div class="result-card">
-                    <div class="result-card-title">充電台数</div>
+                    <div class="result-card-title">
+                        充電台数
+                        <span class="info-tooltip info-tooltip-inline">
+                            <button class="tooltip-trigger" type="button" aria-label="充電台数の説明">i</button>
+                            <span class="tooltip-content">稼働中充電ON時のみ、理論台数 ÷ 充放比で算出します。</span>
+                        </span>
+                    </div>
                     <div class="result-card-value">
                         <span id="totalCharging">0</span>
                         <span class="result-card-unit">台</span>
                     </div>
                 </div>
                 <div class="result-card">
-                    <div class="result-card-title">稼働率</div>
+                    <div class="result-card-title">
+                        稼働率
+                        <span class="info-tooltip info-tooltip-inline">
+                            <button class="tooltip-trigger" type="button" aria-label="稼働率の説明">i</button>
+                            <span class="tooltip-content">理論台数 ÷（推奨投入 - 充電台数）× 100%（充電OFF時は推奨投入で割る）</span>
+                        </span>
+                    </div>
                     <div class="result-card-value">
                         <span id="totalUtilization">0</span>
                         <span class="result-card-unit">%</span>
@@ -1307,18 +1242,102 @@
                         <tr>
                             <th>No.</th>
                             <th>搬送フロー</th>
-                            <th>荷役時間<small>s</small></th>
-                            <th>揚程時間<small>s</small></th>
-                            <th>工程通信<small>s</small></th>
-                            <th>パレット認識<small>s</small></th>
-                            <th>走行時間<small>s</small></th>
-                            <th>旋回時間<small>s</small></th>
-                            <th>連携時間<small>s</small></th>
-                            <th>交通制御時間<small>s</small></th>
-                            <th>作業時間<small>s</small></th>
-                            <th>搬送能力<small>パレット/h</small></th>
-                            <th>理論台数<small>台</small></th>
-                            <th>推奨投入<small>台</small></th>
+                            <th>
+                                <span class="info-tooltip">
+                                    荷役時間
+                                    <button class="tooltip-trigger" type="button" aria-label="荷役時間の説明">i</button>
+                                    <span class="tooltip-content">荷役回数 × 荷役時間（秒/回）。初期値は20秒/回です。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    揚程時間
+                                    <button class="tooltip-trigger" type="button" aria-label="揚程時間の説明">i</button>
+                                    <span class="tooltip-content">((揚程 - 1m) ÷ 0.1m/s) × 2 × 荷役回数（揚程≤1mは0秒）。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    工程通信
+                                    <button class="tooltip-trigger" type="button" aria-label="工程通信の説明">i</button>
+                                    <span class="tooltip-content">荷役回数 × 工程通信（秒/回）。初期値は5秒/回です。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    パレット認識
+                                    <button class="tooltip-trigger" type="button" aria-label="パレット認識時間の説明">i</button>
+                                    <span class="tooltip-content">ON時のみパレット認識（秒）を加算。初期値は15秒です。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    走行時間
+                                    <button class="tooltip-trigger" type="button" aria-label="走行時間の説明">i</button>
+                                    <span class="tooltip-content">搬送距離 ÷ 平均速度。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    旋回時間
+                                    <button class="tooltip-trigger" type="button" aria-label="旋回時間の説明">i</button>
+                                    <span class="tooltip-content">旋回回数 × 旋回時間（秒/回）。初期値は5秒/回です。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    連携時間
+                                    <button class="tooltip-trigger" type="button" aria-label="設備連携時間の説明">i</button>
+                                    <span class="tooltip-content">設備連携回数 × 設備連携（秒/回）。初期値は10秒/回です。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    交通制御時間
+                                    <button class="tooltip-trigger" type="button" aria-label="交通制御時間の説明">i</button>
+                                    <span class="tooltip-content">入力値（秒）。交通管制や待機の追加時間を反映します。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    作業時間
+                                    <button class="tooltip-trigger" type="button" aria-label="作業時間の説明">i</button>
+                                    <span class="tooltip-content">荷役・揚程・工程通信・走行など全時間の合計。</span>
+                                </span>
+                                <small>s</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    搬送能力
+                                    <button class="tooltip-trigger" type="button" aria-label="搬送能力の説明">i</button>
+                                    <span class="tooltip-content">3600 ÷ 作業時間（パレット/時）。</span>
+                                </span>
+                                <small>パレット/h</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    理論台数
+                                    <button class="tooltip-trigger" type="button" aria-label="理論台数の説明">i</button>
+                                    <span class="tooltip-content">搬送タクト ÷ 搬送能力。</span>
+                                </span>
+                                <small>台</small>
+                            </th>
+                            <th>
+                                <span class="info-tooltip">
+                                    推奨投入
+                                    <button class="tooltip-trigger" type="button" aria-label="推奨投入の説明">i</button>
+                                    <span class="tooltip-content">理論台数比率で配分し、充電台数を加味して切り上げます。</span>
+                                </span>
+                                <small>台</small>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="resultTableBody">
@@ -1384,11 +1403,23 @@
                         <input type="text" class="form-input" id="editType">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">定格荷重 (kg)</label>
+                        <label class="form-label">
+                            定格荷重 (kg)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="定格荷重の説明">i</button>
+                                <span class="tooltip-content">車両スペックの基準値。仕様書ベースで編集可能です。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editCapacity" required min="0">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">揚程 (mm)</label>
+                        <label class="form-label">
+                            揚程 (mm)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="揚程の説明">i</button>
+                                <span class="tooltip-content">車両スペックの揚程値。フローの揚程条件と照らして確認します。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editLiftHeight" required min="0">
                     </div>
                 </div>
@@ -1420,11 +1451,23 @@
                         <input type="text" class="form-input" id="editPositionAccuracy">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">空荷速度 (m/s)</label>
+                        <label class="form-label">
+                            空荷速度 (m/s)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="空荷速度の説明">i</button>
+                                <span class="tooltip-content">平均速度の根拠になる値。現場想定に合わせて調整します。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editSpeedEmpty" required min="0" step="0.1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">満載速度 (m/s)</label>
+                        <label class="form-label">
+                            満載速度 (m/s)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="満載速度の説明">i</button>
+                                <span class="tooltip-content">平均速度の根拠になる値。空荷/満載の差を反映します。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editSpeedLoaded" required min="0" step="0.1">
                     </div>
                     <div class="form-group">
@@ -1464,7 +1507,13 @@
                         <input type="text" class="form-input" id="editChargerModel">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">充放比 (1:X)</label>
+                        <label class="form-label">
+                            充放比 (1:X)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="充放比の説明">i</button>
+                                <span class="tooltip-content">稼働中充電モードで使用。Xが大きいほど必要充電台数が増えます。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editChargeRatio" required min="1" step="0.5">
                     </div>
                 </div>
@@ -1485,23 +1534,53 @@
             <form id="formulaForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label">荷役時間 (秒/回)</label>
+                        <label class="form-label">
+                            荷役時間 (秒/回)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="荷役時間の説明">i</button>
+                                <span class="tooltip-content">1回あたりのピック／置き時間。初期値：20秒。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editPickPutTime" required min="1" step="1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">工程通信 (秒/回)</label>
+                        <label class="form-label">
+                            工程通信 (秒/回)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="工程通信の説明">i</button>
+                                <span class="tooltip-content">RDSなどとの通信時間。初期値：5秒。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editCommTime" required min="1" step="1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">パレット認識 (秒)</label>
+                        <label class="form-label">
+                            パレット認識 (秒)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="パレット認識の説明">i</button>
+                                <span class="tooltip-content">認識処理の固定時間。初期値：15秒。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editPalletRecogTime" required min="1" step="1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">旋回時間 (秒/回)</label>
+                        <label class="form-label">
+                            旋回時間 (秒/回)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="旋回時間の説明">i</button>
+                                <span class="tooltip-content">1回の旋回にかかる時間。初期値：5秒。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editTurnTime" required min="1" step="1">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">設備連携 (秒/回)</label>
+                        <label class="form-label">
+                            設備連携 (秒/回)
+                            <span class="info-tooltip info-tooltip-inline">
+                                <button class="tooltip-trigger" type="button" aria-label="設備連携の説明">i</button>
+                                <span class="tooltip-content">自動ドアやコンベヤ連携の時間。初期値：10秒。</span>
+                            </span>
+                        </label>
                         <input type="number" class="form-input" id="editDockTime" required min="1" step="1">
                     </div>
                 </div>
@@ -1601,7 +1680,7 @@
                 card.className = `robot-card${selectedRobot === robot.id ? ' selected' : ''}`;
                 card.dataset.robot = robot.id;
                 card.onclick = (e) => {
-                    if (!e.target.closest('.edit-btn')) {
+                    if (!e.target.closest('.edit-btn') && !e.target.closest('.tooltip-trigger')) {
                         selectRobot(robot.id);
                     }
                 };
@@ -1629,7 +1708,13 @@
                             </div>
                             <div class="spec-text">
                                 <div class="spec-value">${robot.capacity.toLocaleString()} kg</div>
-                                <div class="spec-label">定格荷重</div>
+                                <div class="spec-label">
+                                    定格荷重
+                                    <span class="info-tooltip info-tooltip-inline">
+                                        <button class="tooltip-trigger" type="button" aria-label="定格荷重の説明">i</button>
+                                        <span class="tooltip-content">車両スペックの基準値。仕様書ベースで編集可能です。</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="spec-item">
@@ -1641,7 +1726,13 @@
                             </div>
                             <div class="spec-text">
                                 <div class="spec-value">${robot.speedEmpty}/${robot.speedLoaded} m/s</div>
-                                <div class="spec-label">速度（空荷/満載）</div>
+                                <div class="spec-label">
+                                    速度（空荷/満載）
+                                    <span class="info-tooltip info-tooltip-inline">
+                                        <button class="tooltip-trigger" type="button" aria-label="速度の説明">i</button>
+                                        <span class="tooltip-content">平均速度の設定根拠。現場想定に合わせて平均速度へ反映します。</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="spec-item">
@@ -1652,7 +1743,13 @@
                             </div>
                             <div class="spec-text">
                                 <div class="spec-value">${robot.liftHeight} mm</div>
-                                <div class="spec-label">揚程</div>
+                                <div class="spec-label">
+                                    揚程
+                                    <span class="info-tooltip info-tooltip-inline">
+                                        <button class="tooltip-trigger" type="button" aria-label="揚程の説明">i</button>
+                                        <span class="tooltip-content">車両スペックの揚程値。フロー入力の揚程条件と整合を確認します。</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="spec-item">
@@ -1664,7 +1761,13 @@
                             </div>
                             <div class="spec-text">
                                 <div class="spec-value">1:${robot.chargeRatio}</div>
-                                <div class="spec-label">充放比</div>
+                                <div class="spec-label">
+                                    充放比
+                                    <span class="info-tooltip info-tooltip-inline">
+                                        <button class="tooltip-trigger" type="button" aria-label="充放比の説明">i</button>
+                                        <span class="tooltip-content">稼働中充電モードで使用。Xが大きいほど必要充電台数が増えます。</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
