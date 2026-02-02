@@ -73,6 +73,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            z-index: 30;
         }
 
         .info-tooltip-inline {
@@ -118,7 +119,7 @@
             line-height: 1.5;
             white-space: normal;
             word-break: break-word;
-            z-index: 20;
+            z-index: 40;
             display: none;
         }
 
@@ -261,6 +262,7 @@
             display: flex;
             gap: 16px;
             overflow-x: auto;
+            overflow-y: visible;
             scroll-behavior: smooth;
             padding: 8px 4px 20px 4px;
             margin: -8px -4px;
@@ -372,6 +374,8 @@
             transition: all 0.3s ease;
             position: relative;
             background: var(--card-bg);
+            overflow: visible;
+            z-index: 1;
         }
 
         .robot-card:hover {
@@ -1697,7 +1701,6 @@
                     <div class="robot-card-header">
                         <div class="robot-image">${robot.id.replace(/[0-9]/g, '').substring(0, 3)}</div>
                         <div class="robot-title">
-                            <div class="robot-series">${robot.type}</div>
                             <div class="robot-name">${robot.name}</div>
                         </div>
                     </div>
