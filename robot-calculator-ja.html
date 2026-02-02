@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロボット台数算定システム v1.4.1</title>
+    <style>
+        :root {
+            --primary-color: #4E7DF7;
+            --primary-light: #7B9EF9;
+            --primary-dark: #3A5FCC;
+            --secondary-color: #6B7280;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --error-color: #EF4444;
+            --bg-color: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --border-color: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            margin-bottom: 30px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-desc {
+            font-size: 16px;
+            opacity: 0.85;
+        }
+
+        .version-tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* Section */
+        .section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: white;
+            fill: none;
+        }
+
+        /* Search Box */
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 40px 12px 44px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            background: var(--card-bg);
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(78, 125, 247, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            color: var(--text-secondary);
+        }
+
+        .search-clear.visible {
+            display: flex;
+        }
+
+        .search-clear:hover {
+            background: var(--border-color);
+        }
+
+        .search-clear svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+        }
+
+        /* Robot Cards - Horizontal Scroll */
+        .robot-grid-wrapper {
+            position: relative;
+            margin: 0 -24px;
+            padding: 0 24px;
+        }
+
+        .robot-grid {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 8px 4px 20px 4px;
+            margin: -8px -4px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .robot-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Scroll indicators */
+        .scroll-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .scroll-indicator.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .scroll-indicator:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .scroll-indicator:hover svg {
+            stroke: white;
+        }
+
+        .scroll-indicator svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-secondary);
+        }
+
+        .scroll-left {
+            left: 8px;
+        }
+
+        .scroll-right {
+            right: 8px;
+        }
+
+        /* Scroll fade edges */
+        .robot-grid-wrapper::before,
+        .robot-grid-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .robot-grid-wrapper::before {
+            left: 24px;
+            background: linear-gradient(to right, var(--card-bg), transparent);
+        }
+
+        .robot-grid-wrapper::after {
+            right: 24px;
+            background: linear-gradient(to left, var(--card-bg), transparent);
+        }
+
+        .robot-grid-wrapper.fade-left::before {
+            opacity: 1;
+        }
+
+        .robot-grid-wrapper.fade-right::after {
+            opacity: 1;
+        }
+
+        /* No results message */
+        .no-results {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .robot-card {
+            flex: 0 0 280px;
+            min-width: 280px;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: var(--card-bg);
+        }
+
+        .robot-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .robot-card.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(78, 125, 247, 0.05), rgba(78, 125, 247, 0.1));
+        }
+
+        .robot-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .robot-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .robot-image {
+            width: 70px;
+            height: 70px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .robot-title {
+            flex: 1;
+        }
+
+        .robot-series {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .robot-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .robot-models {
+            font-size: 12px;
+            color: var(--primary-color);
+            margin-top: 4px;
+        }
+
+        .robot-specs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spec-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(78, 125, 247, 0.1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spec-icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--primary-color);
+            fill: none;
+        }
+
+        .spec-text {
+            flex: 1;
+        }
+
+        .spec-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .spec-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* Edit Button */
+        .edit-btn {
+            position: absolute;
+            top: 12px;
+            right: 44px;
+            width: 28px;
+            height: 28px;
+            background: var(--bg-color);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .edit-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .edit-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-secondary);
+        }
+
+        .edit-btn:hover svg {
+            stroke: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Flow Table */
+        .flow-table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        .flow-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .flow-table th {
+            background: var(--bg-color);
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .flow-table th small {
+            display: block;
+            font-weight: normal;
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .flow-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .flow-table input, .flow-table select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 13px;
+            min-width: 70px;
+        }
+
+        .flow-table input:focus, .flow-table select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .flow-table .input-narrow {
+            min-width: 60px;
+            max-width: 80px;
+        }
+
+        .flow-table .input-medium {
+            min-width: 100px;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(78, 125, 247, 0.1);
+        }
+
+        /* Result Section */
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(78, 125, 247, 0.05), rgba(78, 125, 247, 0.1));
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .result-card.highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
+            border-left-color: var(--success-color);
+        }
+
+        .result-card-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .result-card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .result-card-unit {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: normal;
+            margin-left: 4px;
+        }
+
+        /* Result Table */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .result-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 10px;
+            text-align: center;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .result-table th small {
+            display: block;
+            font-weight: normal;
+            opacity: 0.8;
+            font-size: 10px;
+        }
+
+        .result-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-table tbody tr:hover {
+            background: rgba(78, 125, 247, 0.05);
+        }
+
+        .result-table tfoot {
+            background: var(--bg-color);
+            font-weight: 600;
+        }
+
+        .result-table tfoot td {
+            border-top: 2px solid var(--primary-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #D1D5DB;
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 30px 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .section {
+                padding: 16px;
+            }
+
+            .robot-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-table-container {
+                margin: 0 -16px;
+                padding: 0 16px;
+            }
+        }
+
+        /* Result Input (for editable robot count) */
+        .result-input {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: transparent;
+            border: none;
+            width: 80px;
+            text-align: left;
+            padding: 0;
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .result-input::-webkit-outer-spin-button,
+        .result-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .result-input[readonly] {
+            cursor: default;
+        }
+
+        .result-input:not([readonly]) {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 4px 8px;
+            cursor: text;
+        }
+
+        .result-input:not([readonly]):focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>ロボット台数算定システム</h1>
+        <p class="header-desc">自律フォークリフトロボット効率算定ツール</p>
+    </header>
+
+    <div class="container">
+        <!-- Step 1: Flow Input -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="section-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </span>
+                ステップ1：搬送フローを入力
+            </h2>
+
+            <div class="flow-table-container">
+                <table class="flow-table" id="flowTable">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>搬送フロー<small>起点→終点</small></th>
+                            <th>搬送品</th>
+                            <th>搬送タクト<small>パレット/往復/h</small></th>
+                            <th>荷役回数<small>回</small></th>
+                            <th>揚程<small>m</small></th>
+                            <th>パレット認識</th>
+                            <th>搬送距離<small>m（往復）</small></th>
+                            <th>平均速度<small>m/s</small></th>
+                            <th>旋回回数<small>回</small></th>
+                            <th>設備連携<small>回</small></th>
+                            <th>交通制御時間<small>s</small></th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flowTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="action-row">
+                <button class="btn btn-primary" onclick="addFlowRow()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    フローを追加
+                </button>
+                <button class="btn btn-secondary" onclick="clearAllRows()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    すべてクリア
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 2: Robot Selection -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="section-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="10" rx="2"/>
+                        <circle cx="12" cy="5" r="2"/>
+                        <path d="M12 7v4"/>
+                        <line x1="8" y1="16" x2="8" y2="16"/>
+                        <line x1="16" y1="16" x2="16" y2="16"/>
+                    </svg>
+                </span>
+                ステップ2：車種を選択（編集ボタンでパラメータを変更）
+            </h2>
+
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input type="text" class="search-input" id="robotSearch" placeholder="型式またはタイプを検索...">
+                <button class="search-clear" id="searchClear" onclick="clearSearch()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="robot-grid-wrapper" id="robotGridWrapper">
+                <button class="scroll-indicator scroll-left" id="scrollLeft" onclick="scrollRobotGrid(-1)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                </button>
+                <div class="robot-grid" id="robotGrid">
+                    <!-- Cards will be generated by JavaScript -->
+                </div>
+                <button class="scroll-indicator scroll-right" id="scrollRight" onclick="scrollRobotGrid(1)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Results -->
+        <section class="section">
+            <div class="result-header">
+                <h2 class="section-title">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </span>
+                    ステップ3：効率算定結果
+                    <button class="edit-btn" onclick="openFormulaModal()" title="計算式パラメータ編集" style="position: relative; top: 0; right: 0; margin-left: 12px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                </h2>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <label class="form-label" style="display: inline-flex; align-items: center; gap: 8px; margin: 0;">
+                        稼働中充電:
+                        <label class="toggle">
+                            <input type="checkbox" id="workCharging" onchange="calculateAll()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+
+            <div class="result-grid" id="resultSummary">
+                <div class="result-card highlight">
+                    <div class="result-card-title">推奨投入ロボット台数 <span id="editableHint" style="font-size: 11px; color: var(--warning-color); display: none;">（編集可）</span></div>
+                    <div class="result-card-value">
+                        <input type="number" id="totalRobots" value="0" min="1" step="1"
+                               class="result-input" readonly
+                               oninput="onManualRobotInput()">
+                        <span class="result-card-unit">台</span>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-title">総搬送能力</div>
+                    <div class="result-card-value">
+                        <span id="totalCapacity">0</span>
+                        <span class="result-card-unit">パレット/h</span>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-title">充電台数</div>
+                    <div class="result-card-value">
+                        <span id="totalCharging">0</span>
+                        <span class="result-card-unit">台</span>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <div class="result-card-title">稼働率</div>
+                    <div class="result-card-value">
+                        <span id="totalUtilization">0</span>
+                        <span class="result-card-unit">%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-table-container">
+                <table class="result-table" id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>搬送フロー</th>
+                            <th>荷役時間<small>s</small></th>
+                            <th>揚程時間<small>s</small></th>
+                            <th>工程通信<small>s</small></th>
+                            <th>パレット認識<small>s</small></th>
+                            <th>走行時間<small>s</small></th>
+                            <th>旋回時間<small>s</small></th>
+                            <th>連携時間<small>s</small></th>
+                            <th>交通制御時間<small>s</small></th>
+                            <th>作業時間<small>s</small></th>
+                            <th>搬送能力<small>パレット/h</small></th>
+                            <th>理論台数<small>台</small></th>
+                            <th>推奨投入<small>台</small></th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTableBody">
+                        <tr>
+                            <td colspan="14" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                搬送フローを追加し、車種を選択してください
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot id="resultTableFoot" style="display: none;">
+                        <tr>
+                            <td colspan="11">合計</td>
+                            <td id="footCapacity">-</td>
+                            <td id="footTheory">-</td>
+                            <td id="footRecommend">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- Notes Section -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="section-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 16v-4"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+                </span>
+                算定説明
+            </h2>
+            <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.8;">
+                <p><strong>荷役時間</strong>：1回の荷役動作時間＝荷役回数×20秒</p>
+                <p><strong>揚程時間</strong>：1m超の昇降荷役は超過分で算定。1m以下の揚程は1mとして計算</p>
+                <p><strong>工程通信</strong>：荷役時にロボットとRDSシステムの通信時間＝5秒/回</p>
+                <p><strong>パレット認識</strong>：主にピック時に使用、15秒/回で算定</p>
+                <p><strong>走行時間</strong>：搬送距離 ÷ 平均速度</p>
+                <p><strong>旋回時間</strong>：1回の旋回あたり、標準値＝5秒/回</p>
+                <p><strong>設備連携</strong>：自動ドア・コンベヤ・エレベータ連携＝10秒/回；エレベータ乗継＝45秒/回</p>
+                <p><strong>稼働率</strong>：待機・障害待ち・ネットワーク遅延などの余裕率。一般的に85%〜90%</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal" style="max-width: 700px;">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3 class="modal-title" id="modalTitle">ロボットパラメータ編集</h3>
+            <form id="editForm" style="max-height: 70vh; overflow-y: auto;">
+                <input type="hidden" id="editRobotId">
+
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-color); margin: 16px 0 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">基本情報</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">型式名</label>
+                        <input type="text" class="form-input" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">タイプ</label>
+                        <input type="text" class="form-input" id="editType">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">定格荷重 (kg)</label>
+                        <input type="number" class="form-input" id="editCapacity" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">揚程 (mm)</label>
+                        <input type="number" class="form-input" id="editLiftHeight" required min="0">
+                    </div>
+                </div>
+
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-color); margin: 16px 0 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">マスト／フォーク</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">マスト最大揚程 (mm)</label>
+                        <input type="text" class="form-input" id="editMastHeight">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">標準フォーク寸法 l/e/s (mm)</label>
+                        <input type="text" class="form-input" id="editForkSize">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">フォーク最低地上高 (mm)</label>
+                        <input type="text" class="form-input" id="editForkGroundClearance">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">フォーク標準外側間隔 (mm)</label>
+                        <input type="text" class="form-input" id="editForkSpacing">
+                    </div>
+                </div>
+
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-color); margin: 16px 0 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">性能諸元</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">位置決め精度</label>
+                        <input type="text" class="form-input" id="editPositionAccuracy">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">空荷速度 (m/s)</label>
+                        <input type="number" class="form-input" id="editSpeedEmpty" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">満載速度 (m/s)</label>
+                        <input type="number" class="form-input" id="editSpeedLoaded" required min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">登坂能力（空荷/満載）</label>
+                        <input type="text" class="form-input" id="editClimbAbility">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">通路幅 (mm)</label>
+                        <input type="text" class="form-input" id="editAisleWidth">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">外形寸法 LxWxH (mm)</label>
+                        <input type="text" class="form-input" id="editDimensions">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">自重 (kg)</label>
+                        <input type="number" class="form-input" id="editWeight" min="0">
+                    </div>
+                </div>
+
+                <div style="font-size: 13px; font-weight: 600; color: var(--primary-color); margin: 16px 0 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">バッテリー／充電</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">標準容量 (Ah)</label>
+                        <input type="text" class="form-input" id="editBatteryCapacity">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">稼働時間 (h)</label>
+                        <input type="text" class="form-input" id="editBatteryLife">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">充電時間 (h)</label>
+                        <input type="text" class="form-input" id="editChargeTime">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">充電器型式</label>
+                        <input type="text" class="form-input" id="editChargerModel">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">充放比 (1:X)</label>
+                        <input type="number" class="form-input" id="editChargeRatio" required min="1" step="0.5">
+                    </div>
+                </div>
+
+                <div class="action-row" style="justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Formula Edit Modal -->
+    <div class="modal-overlay" id="formulaModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeFormulaModal()">&times;</button>
+            <h3 class="modal-title">計算式パラメータ編集</h3>
+            <form id="formulaForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">荷役時間 (秒/回)</label>
+                        <input type="number" class="form-input" id="editPickPutTime" required min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">工程通信 (秒/回)</label>
+                        <input type="number" class="form-input" id="editCommTime" required min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">パレット認識 (秒)</label>
+                        <input type="number" class="form-input" id="editPalletRecogTime" required min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">旋回時間 (秒/回)</label>
+                        <input type="number" class="form-input" id="editTurnTime" required min="1" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">設備連携 (秒/回)</label>
+                        <input type="number" class="form-input" id="editDockTime" required min="1" step="1">
+                    </div>
+                </div>
+                <div class="action-row" style="justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeFormulaModal()">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>ロボット台数算定システム v1.4.1 | Robot Calculator System</p>
+        <p>Made by 韓</p>
+    </footer>
+
+    <script>
+        // Formula configurations (editable) - stored in localStorage
+        const defaultFormulaConfigs = {
+            pickPutTimePerAction: 20,      // 荷役時間：1回あたり20秒
+            commTimePerAction: 5,          // 工程通信：1回あたり5秒
+            palletRecogTime: 15,           // パレット認識：15秒
+            turnTimePerTurn: 5,            // 旋回時間：1回あたり5秒
+            dockTimePerDock: 10            // 設備連携：1回あたり10秒
+        };
+
+        // Load formula configs from localStorage or use defaults
+        let formulaConfigs = JSON.parse(localStorage.getItem('formulaConfigs')) || { ...defaultFormulaConfigs };
+
+        // Default robot configurations (complete data from Excel)
+        const defaultRobotConfigs = {
+            APe15: { id: 'APe15', name: 'APe15', type: 'カウンターバランス式フォークリフト', capacity: 1500, liftHeight: 205, mastHeight: '—', forkSize: '1150x180x85', forkGroundClearance: '86', forkSpacing: '520/570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '1870+200x2', dimensions: '1515x790x1860', weight: 300, batteryCapacity: '24V60Ah', batteryLife: '5~6h', chargeTime: '≤2h', chargerModel: '24V30A（標準）', chargeRatio: 3 },
+            APx20: { id: 'APx20', name: 'APx20', type: 'カウンターバランス式フォークリフト', capacity: 2000, liftHeight: 190, mastHeight: '—', forkSize: '1150x180x70', forkGroundClearance: '65/115/190', forkSpacing: '570', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '1980+200x2', dimensions: '1636x830x2030', weight: 450, batteryCapacity: '24V100Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V50A/100A', chargeRatio: 2 },
+            AP20: { id: 'AP20', name: 'AP20', type: 'カウンターバランス式フォークリフト', capacity: 2000, liftHeight: 210, mastHeight: '—', forkSize: '1150x180x85', forkGroundClearance: '85', forkSpacing: '520/570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '2050+200x2', dimensions: '1865x895x1865', weight: 530, batteryCapacity: '24V100Ah', batteryLife: '6~8h', chargeTime: '≤1h', chargerModel: '24V100A（標準）', chargeRatio: 2 },
+            AP30: { id: 'AP30', name: 'AP30', type: 'カウンターバランス式フォークリフト', capacity: 3000, liftHeight: 210, mastHeight: '—', forkSize: '1150x180x85', forkGroundClearance: '85', forkSpacing: '520/570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '2050+200x2', dimensions: '1865x895x1865', weight: 550, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2.5h', chargerModel: '24V100A（標準）', chargeRatio: 2 },
+            AP60: { id: 'AP60', name: 'AP60', type: 'カウンターバランス式フォークリフト', capacity: 6000, liftHeight: 270, mastHeight: '—', forkSize: '1150x250x150', forkGroundClearance: '150', forkSpacing: '800', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '2430+200x2', dimensions: '2280x1140x2025', weight: 1430, batteryCapacity: '48V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '48V100A（標準）', chargeRatio: 2 },
+            AL05: { id: 'AL05', name: 'AL05', type: 'ケース搬送車', capacity: 500, liftHeight: 600, mastHeight: '—', forkSize: '700x280x60', forkGroundClearance: '95', forkSpacing: '280', positionAccuracy: '±10mm/±1°', speedEmpty: 1.0, speedLoaded: 0.8, climbAbility: '3%/1%', aisleWidth: '1280', dimensions: '1045x800x1670', weight: 350, batteryCapacity: '48V50Ah', batteryLife: '6~8h', chargeTime: '≤2.5h', chargerModel: '48V20A（標準）', chargeRatio: 2 },
+            AM15: { id: 'AM15', name: 'AM15', type: 'スタッカー', capacity: 1500, liftHeight: 1600, mastHeight: '1600/2000', forkSize: '1150x180x70', forkGroundClearance: '87', forkSpacing: '520/570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '1900+200x2', dimensions: '1635x880x1890', weight: 700, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤1h', chargerModel: '24V100A（標準）', chargeRatio: 4 },
+            AS15: { id: 'AS15', name: 'AS15', type: 'スタッカー', capacity: 1500, liftHeight: 3000, mastHeight: '2500/6000', forkSize: '1150x180x70', forkGroundClearance: '87', forkSpacing: '570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '2250+200x2', dimensions: '1902x890x2020', weight: 995, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            AS20: { id: 'AS20', name: 'AS20', type: 'スタッカー', capacity: 2000, liftHeight: 3000, mastHeight: '2500/6000/7000', forkSize: '1150x180x70', forkGroundClearance: '87', forkSpacing: '570/680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '2550+200x2', dimensions: '2090x1165x2105', weight: 1345, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            AS30: { id: 'AS30', name: 'AS30', type: 'スタッカー', capacity: 3000, liftHeight: 1200, mastHeight: '1600/6000/7000', forkSize: '1150x200x120', forkGroundClearance: '140', forkSpacing: '1200', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '2570+200x2', dimensions: '2175x1296x2095', weight: 1420, batteryCapacity: '24V310Ah', batteryLife: '6~8h', chargeTime: '≤3h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            ASK15: { id: 'ASK15', name: 'ASK15', type: 'ナローアイルスタッカー', capacity: 1500, liftHeight: 3000, mastHeight: '1600/6000/7000', forkSize: '1150x100x45', forkGroundClearance: '87', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '2170+200x2', dimensions: '1902x1296x2205', weight: 995, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            ASK20: { id: 'ASK20', name: 'ASK20', type: 'ナローアイルスタッカー', capacity: 2000, liftHeight: 1600, mastHeight: '1600/6000/7000', forkSize: '1150x100x50', forkGroundClearance: '110', forkSpacing: '750', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '3300+200x2', dimensions: '2790x1020x2225', weight: 1280, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            ASK30: { id: 'ASK30', name: 'ASK30', type: 'ナローアイルスタッカー', capacity: 3000, liftHeight: 5000, mastHeight: '1600/6000/7000', forkSize: '1150x150x55', forkGroundClearance: '65', forkSpacing: '900', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '3900+200x2', dimensions: '3523x1590x3305', weight: 4200, batteryCapacity: '48V400Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '48V200A（標準）', chargeRatio: 3 },
+            AE10: { id: 'AE10', name: 'AE10', type: '電動フォークリフト', capacity: 1000, liftHeight: 1600, mastHeight: '1600/6000/7000', forkSize: '1150x100x40', forkGroundClearance: '50', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '10%/5%', aisleWidth: '2650+200x2', dimensions: '2477x996x2200', weight: 1685, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            AE15: { id: 'AE15', name: 'AE15', type: '電動フォークリフト', capacity: 1500, liftHeight: 3000, mastHeight: '1600/6000/7000', forkSize: '1150x100x40', forkGroundClearance: '50', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '2650+200x2', dimensions: '2478x1047x1975', weight: 2530, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 3 },
+            AE20: { id: 'AE20', name: 'AE20', type: '電動フォークリフト', capacity: 2000, liftHeight: 1600, mastHeight: '1600/6000/10000', forkSize: '1150x122x50', forkGroundClearance: '60', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '3150+200x2', dimensions: '2828x1450x2700', weight: 4310, batteryCapacity: '48V310Ah', batteryLife: '6~8h', chargeTime: '≤3h', chargerModel: '48V100A/200A', chargeRatio: 3 },
+            AE30: { id: 'AE30', name: 'AE30', type: '電動フォークリフト', capacity: 3000, liftHeight: 1500, mastHeight: '1600/6000/10000', forkSize: '1150x122x50', forkGroundClearance: '60', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.5, speedLoaded: 1.7, climbAbility: '10%/5%', aisleWidth: '3320+200x2', dimensions: '3080x1200x2560', weight: 4735, batteryCapacity: '48V310Ah', batteryLife: '6~8h', chargeTime: '≤3h', chargerModel: '48V100A/200A', chargeRatio: 3 },
+            AR10: { id: 'AR10', name: 'AR10', type: 'リーチ式フォークリフト', capacity: 1000, liftHeight: 1600, mastHeight: '1600/6000/7000', forkSize: '1150x100x40', forkGroundClearance: '50', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '10%/5%', aisleWidth: '2350+200x2', dimensions: '2150x1060x2025', weight: 1345, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 4 },
+            AR15: { id: 'AR15', name: 'AR15', type: 'リーチ式フォークリフト', capacity: 1500, liftHeight: 3000, mastHeight: '1600/6000/7000', forkSize: '1150x100x40', forkGroundClearance: '50', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '2350+200x2', dimensions: '2150x1110x2050', weight: 2125, batteryCapacity: '24V210Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '24V100A（標準）', chargeRatio: 4 },
+            AR20: { id: 'AR20', name: 'AR20', type: 'リーチ式フォークリフト', capacity: 2000, liftHeight: 6000, mastHeight: '1600/6000/10000', forkSize: '1150x122x45', forkGroundClearance: '55', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '2800+200x2', dimensions: '2630x1380x3100', weight: 4350, batteryCapacity: '48V310Ah', batteryLife: '6~8h', chargeTime: '≤3h', chargerModel: '48V100A/200A', chargeRatio: 4 },
+            ARK15: { id: 'ARK15', name: 'ARK15', type: 'リーチ式フォークリフト', capacity: 1500, liftHeight: 3000, mastHeight: '1600/6000/10000', forkSize: '1150x100x45', forkGroundClearance: '55', forkSpacing: '680', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '2550', dimensions: '1965x2160x2385', weight: 2735, batteryCapacity: '48V310Ah', batteryLife: '6~8h', chargeTime: '≤3h', chargerModel: '48V100A/200A', chargeRatio: 4 },
+            ARV15: { id: 'ARV15', name: 'ARV15', type: 'リーチ式フォークリフト', capacity: 1500, liftHeight: 6000, mastHeight: '—', forkSize: '1150x120x40', forkGroundClearance: '50', forkSpacing: '660', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '10%/5%', aisleWidth: '2760', dimensions: '2525x1460x2460', weight: 2470, batteryCapacity: '48V210Ah', batteryLife: '6~8h', chargeTime: '≤2.5h', chargerModel: '48V100A', chargeRatio: 4 },
+            TP30: { id: 'TP30', name: 'TP30', type: 'パレット搬送車', capacity: 300, liftHeight: 60, mastHeight: '—', forkSize: '—', forkGroundClearance: '—', forkSpacing: '—', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/2%', aisleWidth: '950', dimensions: '750x540x230', weight: 90, batteryCapacity: '48V20Ah', batteryLife: '6~8h', chargeTime: '≤2h', chargerModel: '48V10A（標準）', chargeRatio: 2.5 },
+            TP60: { id: 'TP60', name: 'TP60', type: 'パレット搬送車', capacity: 600, liftHeight: 60, mastHeight: '—', forkSize: '—', forkGroundClearance: '—', forkSpacing: '—', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '1130', dimensions: '930x660x250', weight: 155, batteryCapacity: '48V30Ah', batteryLife: '6~8h', chargeTime: '≤1.5h', chargerModel: '48V20A/10A', chargeRatio: 2.5 },
+            TP100: { id: 'TP100', name: 'TP100', type: 'パレット搬送車', capacity: 1000, liftHeight: 60, mastHeight: '—', forkSize: '—', forkGroundClearance: '—', forkSpacing: '—', positionAccuracy: '±10mm/±1°', speedEmpty: 2.0, speedLoaded: 1.5, climbAbility: '5%/3%', aisleWidth: '1460', dimensions: '1180x860x265', weight: 300, batteryCapacity: '48V50Ah', batteryLife: '6~8h', chargeTime: '≤2.5h', chargerModel: '48V20A/10A', chargeRatio: 2.5 },
+            TP150: { id: 'TP150', name: 'TP150', type: 'パレット搬送車', capacity: 1500, liftHeight: 60, mastHeight: '—', forkSize: '—', forkGroundClearance: '—', forkSpacing: '—', positionAccuracy: '±10mm/±1°', speedEmpty: 1.5, speedLoaded: 1.0, climbAbility: '5%/3%', aisleWidth: '1460', dimensions: '1180x860x265', weight: 300, batteryCapacity: '48V50Ah', batteryLife: '6~8h', chargeTime: '≤2.5h', chargerModel: '48V20A/10A', chargeRatio: 2.5 }
+        };
+
+        // Load robot configs from localStorage or use defaults
+        let robotConfigs = JSON.parse(localStorage.getItem('robotConfigs')) || JSON.parse(JSON.stringify(defaultRobotConfigs));
+
+        // Merge with defaults for any missing properties
+        Object.keys(defaultRobotConfigs).forEach(key => {
+            if (!robotConfigs[key]) {
+                robotConfigs[key] = { ...defaultRobotConfigs[key] };
+            }
+        });
+
+        let selectedRobot = null;
+        let flowCounter = 0;
+        let manualRobotCount = null; // ユーザーが手入力した推奨投入値
+        let lastCalculatedTheory = 0; // 最後に算出した理論台数（稼働率再計算用）
+        let searchQuery = ''; // 検索キーワード
+
+        // Generate robot cards
+        function renderRobotCards(filter = '') {
+            const grid = document.getElementById('robotGrid');
+            grid.innerHTML = '';
+
+            const robots = Object.values(robotConfigs).filter(robot => {
+                if (!filter) return true;
+                const query = filter.toLowerCase();
+                return robot.id.toLowerCase().includes(query) ||
+                       robot.name.toLowerCase().includes(query) ||
+                       robot.type.toLowerCase().includes(query);
+            });
+
+            if (robots.length === 0) {
+                grid.innerHTML = '<div class="no-results">一致する製品が見つかりません</div>';
+                updateScrollIndicators();
+                return;
+            }
+
+            robots.forEach(robot => {
+                const card = document.createElement('div');
+                card.className = `robot-card${selectedRobot === robot.id ? ' selected' : ''}`;
+                card.dataset.robot = robot.id;
+                card.onclick = (e) => {
+                    if (!e.target.closest('.edit-btn')) {
+                        selectRobot(robot.id);
+                    }
+                };
+
+                card.innerHTML = `
+                    <button class="edit-btn" onclick="openEditModal('${robot.id}')" title="パラメータを編集">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </button>
+                    <div class="robot-card-header">
+                        <div class="robot-image">${robot.id.replace(/[0-9]/g, '').substring(0, 3)}</div>
+                        <div class="robot-title">
+                            <div class="robot-series">${robot.type}</div>
+                            <div class="robot-name">${robot.name}</div>
+                        </div>
+                    </div>
+                    <div class="robot-specs">
+                        <div class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.4 20H3.6L6 8h12l2.4 12z"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <div class="spec-value">${robot.capacity.toLocaleString()} kg</div>
+                                <div class="spec-label">定格荷重</div>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M13 17l5-5-5-5"/>
+                                    <path d="M6 17l5-5-5-5"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <div class="spec-value">${robot.speedEmpty}/${robot.speedLoaded} m/s</div>
+                                <div class="spec-label">速度（空荷/満載）</div>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20M2 12h20"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <div class="spec-value">${robot.liftHeight} mm</div>
+                                <div class="spec-label">揚程</div>
+                            </div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-icon">
+                                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 6v6l4 2"/>
+                                </svg>
+                            </div>
+                            <div class="spec-text">
+                                <div class="spec-value">1:${robot.chargeRatio}</div>
+                                <div class="spec-label">充放比</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            updateScrollIndicators();
+        }
+
+        // Search functionality
+        function handleSearch(e) {
+            searchQuery = e.target.value;
+            document.getElementById('searchClear').classList.toggle('visible', searchQuery.length > 0);
+            renderRobotCards(searchQuery);
+        }
+
+        function clearSearch() {
+            document.getElementById('robotSearch').value = '';
+            searchQuery = '';
+            document.getElementById('searchClear').classList.remove('visible');
+            renderRobotCards();
+        }
+
+        // Scroll functionality
+        function scrollRobotGrid(direction) {
+            const grid = document.getElementById('robotGrid');
+            const cardWidth = 296; // card width + gap
+            grid.scrollBy({ left: direction * cardWidth * 2, behavior: 'smooth' });
+        }
+
+        function updateScrollIndicators() {
+            const grid = document.getElementById('robotGrid');
+            const wrapper = document.getElementById('robotGridWrapper');
+            const scrollLeft = document.getElementById('scrollLeft');
+            const scrollRight = document.getElementById('scrollRight');
+
+            if (!grid || !wrapper) return;
+
+            const canScrollLeft = grid.scrollLeft > 10;
+            const canScrollRight = grid.scrollLeft < grid.scrollWidth - grid.clientWidth - 10;
+
+            scrollLeft.classList.toggle('visible', canScrollLeft);
+            scrollRight.classList.toggle('visible', canScrollRight);
+            wrapper.classList.toggle('fade-left', canScrollLeft);
+            wrapper.classList.toggle('fade-right', canScrollRight);
+        }
+
+        // Select robot
+        function selectRobot(robotId) {
+            selectedRobot = selectedRobot === robotId ? null : robotId;
+            renderRobotCards(searchQuery);
+            calculateAll();
+        }
+
+        // Open edit modal
+        function openEditModal(robotId) {
+            const robot = robotConfigs[robotId];
+            document.getElementById('editRobotId').value = robotId;
+            document.getElementById('editName').value = robot.name || '';
+            document.getElementById('editType').value = robot.type || '';
+            document.getElementById('editCapacity').value = robot.capacity || 0;
+            document.getElementById('editLiftHeight').value = robot.liftHeight || 0;
+            document.getElementById('editMastHeight').value = robot.mastHeight || '';
+            document.getElementById('editForkSize').value = robot.forkSize || '';
+            document.getElementById('editForkGroundClearance').value = robot.forkGroundClearance || '';
+            document.getElementById('editForkSpacing').value = robot.forkSpacing || '';
+            document.getElementById('editPositionAccuracy').value = robot.positionAccuracy || '';
+            document.getElementById('editSpeedEmpty').value = robot.speedEmpty || 0;
+            document.getElementById('editSpeedLoaded').value = robot.speedLoaded || 0;
+            document.getElementById('editClimbAbility').value = robot.climbAbility || '';
+            document.getElementById('editAisleWidth').value = robot.aisleWidth || '';
+            document.getElementById('editDimensions').value = robot.dimensions || '';
+            document.getElementById('editWeight').value = robot.weight || 0;
+            document.getElementById('editBatteryCapacity').value = robot.batteryCapacity || '';
+            document.getElementById('editBatteryLife').value = robot.batteryLife || '';
+            document.getElementById('editChargeTime').value = robot.chargeTime || '';
+            document.getElementById('editChargerModel').value = robot.chargerModel || '';
+            document.getElementById('editChargeRatio').value = robot.chargeRatio || 3;
+            document.getElementById('modalTitle').textContent = `「${robot.name}」のパラメータ編集`;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // Handle form submit
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const robotId = document.getElementById('editRobotId').value;
+            robotConfigs[robotId] = {
+                ...robotConfigs[robotId],
+                name: document.getElementById('editName').value,
+                type: document.getElementById('editType').value,
+                capacity: parseFloat(document.getElementById('editCapacity').value) || 0,
+                liftHeight: parseFloat(document.getElementById('editLiftHeight').value) || 0,
+                mastHeight: document.getElementById('editMastHeight').value,
+                forkSize: document.getElementById('editForkSize').value,
+                forkGroundClearance: document.getElementById('editForkGroundClearance').value,
+                forkSpacing: document.getElementById('editForkSpacing').value,
+                positionAccuracy: document.getElementById('editPositionAccuracy').value,
+                speedEmpty: parseFloat(document.getElementById('editSpeedEmpty').value) || 0,
+                speedLoaded: parseFloat(document.getElementById('editSpeedLoaded').value) || 0,
+                climbAbility: document.getElementById('editClimbAbility').value,
+                aisleWidth: document.getElementById('editAisleWidth').value,
+                dimensions: document.getElementById('editDimensions').value,
+                weight: parseFloat(document.getElementById('editWeight').value) || 0,
+                batteryCapacity: document.getElementById('editBatteryCapacity').value,
+                batteryLife: document.getElementById('editBatteryLife').value,
+                chargeTime: document.getElementById('editChargeTime').value,
+                chargerModel: document.getElementById('editChargerModel').value,
+                chargeRatio: parseFloat(document.getElementById('editChargeRatio').value) || 3
+            };
+            // Save to localStorage
+            localStorage.setItem('robotConfigs', JSON.stringify(robotConfigs));
+            closeModal();
+            renderRobotCards(searchQuery);
+            calculateAll();
+        });
+
+        // Add flow row
+        function addFlowRow() {
+            flowCounter++;
+            const tbody = document.getElementById('flowTableBody');
+
+            const row = document.createElement('tr');
+            row.id = `flow-${flowCounter}`;
+            row.innerHTML = `
+                <td>${flowCounter}</td>
+                <td><input type="text" class="input-medium" placeholder="A→B" data-field="route" oninput="calculateAll()"></td>
+                <td><input type="text" class="input-medium" placeholder="仕掛品" data-field="cargo" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="12" min="1" data-field="tempo" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="2" min="1" data-field="pickTimes" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="1" min="0" step="0.1" data-field="liftHeight" oninput="calculateAll()"></td>
+                <td>
+                    <div class="toggle-wrapper">
+                        <label class="toggle">
+                            <input type="checkbox" data-field="palletRecog" onchange="calculateAll()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </td>
+                <td><input type="number" class="input-narrow" value="80" min="1" data-field="distance" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="0.8" min="0.1" max="2" step="0.1" data-field="avgSpeed" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="4" min="0" data-field="turns" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="0" min="0" data-field="docking" oninput="calculateAll()"></td>
+                <td><input type="number" class="input-narrow" value="15" min="0" data-field="trafficTime" oninput="calculateAll()"></td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="removeFlowRow(${flowCounter})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            calculateAll();
+        }
+
+        // Remove flow row
+        function removeFlowRow(id) {
+            const row = document.getElementById(`flow-${id}`);
+            if (row) {
+                row.remove();
+                renumberRows();
+                calculateAll();
+            }
+        }
+
+        // Renumber rows
+        function renumberRows() {
+            const rows = document.querySelectorAll('#flowTableBody tr');
+            rows.forEach((row, index) => {
+                row.querySelector('td:first-child').textContent = index + 1;
+            });
+        }
+
+        // Clear all rows
+        function clearAllRows() {
+            document.getElementById('flowTableBody').innerHTML = '';
+            flowCounter = 0;
+            calculateAll();
+        }
+
+        // Get row data
+        function getRowData(row) {
+            return {
+                route: row.querySelector('[data-field="route"]').value || '-',
+                cargo: row.querySelector('[data-field="cargo"]').value || '-',
+                tempo: parseFloat(row.querySelector('[data-field="tempo"]').value) || 0,
+                pickTimes: parseFloat(row.querySelector('[data-field="pickTimes"]').value) || 0,
+                liftHeight: parseFloat(row.querySelector('[data-field="liftHeight"]').value) || 0,
+                palletRecog: row.querySelector('[data-field="palletRecog"]').checked,
+                distance: parseFloat(row.querySelector('[data-field="distance"]').value) || 0,
+                avgSpeed: parseFloat(row.querySelector('[data-field="avgSpeed"]').value) || 0.8,
+                turns: parseFloat(row.querySelector('[data-field="turns"]').value) || 0,
+                docking: parseFloat(row.querySelector('[data-field="docking"]').value) || 0,
+                trafficTime: parseFloat(row.querySelector('[data-field="trafficTime"]').value) || 0
+            };
+        }
+
+        // Calculate efficiency for a single row
+        function calculateRow(data) {
+            const pickPutTime = data.pickTimes * formulaConfigs.pickPutTimePerAction;
+
+            let liftTime = 0;
+            if (data.liftHeight > 1) {
+                const liftSpeed = 0.1; // 揚程固定速度 0.1 m/s
+                liftTime = ((data.liftHeight - 1) / liftSpeed) * 2 * data.pickTimes;
+            }
+
+            const commTime = formulaConfigs.commTimePerAction * data.pickTimes;
+            const palletTime = data.palletRecog ? formulaConfigs.palletRecogTime : 0;
+            const runTime = data.avgSpeed > 0 ? data.distance / data.avgSpeed : 0;
+            const turnTime = data.turns * formulaConfigs.turnTimePerTurn;
+            const dockTime = data.docking * formulaConfigs.dockTimePerDock;
+
+            const trafficTime = data.trafficTime || 0;
+            const totalTime = pickPutTime + liftTime + commTime + palletTime + runTime + turnTime + dockTime + trafficTime;
+            const capacity = totalTime > 0 ? 3600 / totalTime : 0;
+            const theoryCount = data.tempo > 0 && capacity > 0 ? data.tempo / capacity : 0;
+
+            return {
+                pickPutTime: Math.round(pickPutTime * 10) / 10,
+                liftTime: Math.round(liftTime * 10) / 10,
+                commTime: Math.round(commTime * 10) / 10,
+                palletTime: Math.round(palletTime * 10) / 10,
+                runTime: Math.round(runTime * 10) / 10,
+                turnTime: Math.round(turnTime * 10) / 10,
+                dockTime: Math.round(dockTime * 10) / 10,
+                trafficTime: Math.round(trafficTime * 10) / 10,
+                totalTime: Math.round(totalTime * 10) / 10,
+                capacity: Math.round(capacity * 100) / 100,
+                theoryCount: Math.round(theoryCount * 100) / 100
+            };
+        }
+
+        // Calculate all
+        function calculateAll(fromManualInput = false) {
+            const rows = document.querySelectorAll('#flowTableBody tr');
+            const resultBody = document.getElementById('resultTableBody');
+            const resultFoot = document.getElementById('resultTableFoot');
+            const isWorkCharging = document.getElementById('workCharging').checked;
+            const robotInput = document.getElementById('totalRobots');
+            const editableHint = document.getElementById('editableHint');
+
+            if (rows.length === 0 || !selectedRobot) {
+                resultBody.innerHTML = `
+                    <tr>
+                        <td colspan="14" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            搬送フローを追加し、車種を選択してください
+                        </td>
+                    </tr>
+                `;
+                resultFoot.style.display = 'none';
+                updateSummary(0, 0, 0, 0);
+                setRobotInputEditable(false);
+                manualRobotCount = null;
+                return;
+            }
+
+            const chargeRatio = robotConfigs[selectedRobot].chargeRatio;
+            let html = '';
+            let totalCapacity = 0;
+            let totalTheory = 0;
+
+            // First pass: calculate theory counts
+            const rowResults = [];
+            rows.forEach((row, index) => {
+                const data = getRowData(row);
+                const result = calculateRow(data);
+                rowResults.push({ data, result });
+                totalCapacity += result.capacity;
+                totalTheory += result.theoryCount;
+            });
+
+            // 理論台数を手入力用に保存
+            lastCalculatedTheory = totalTheory;
+
+            // Calculate totals based on charging mode
+            let totalRecommend, chargingCount, utilization;
+            let autoCalculatedRecommend; // システム自動算出の推奨投入
+            let autoCalculatedUtilization; // システム自動算出の稼働率
+            let autoChargingCount; // システム自動算出の充電台数
+
+            if (isWorkCharging) {
+                // 稼働中充電モード
+                // 充電台数 = 理論台数 × (1/充放比)
+                autoChargingCount = totalTheory / chargeRatio;
+                // 推奨投入 = Roundup(理論台数 + 充電台数)
+                autoCalculatedRecommend = Math.ceil(totalTheory + autoChargingCount);
+                // 稼働率 = 理論台数 / (推奨投入 - 充電台数) × 100%
+                const workingRobots = autoCalculatedRecommend - autoChargingCount;
+                autoCalculatedUtilization = workingRobots > 0 ? (totalTheory / workingRobots) * 100 : 0;
+            } else {
+                // 非稼働中充電モード
+                // 充電台数 = 0
+                autoChargingCount = 0;
+                // 推奨投入 = Roundup(理論台数)
+                autoCalculatedRecommend = Math.ceil(totalTheory);
+                // 稼働率 = 理論台数 / 推奨投入 × 100%
+                autoCalculatedUtilization = autoCalculatedRecommend > 0 ? (totalTheory / autoCalculatedRecommend) * 100 : 0;
+            }
+
+            // 手入力を許可するか判定（自動算出の稼働率 > 90% の場合）
+            const allowManualInput = autoCalculatedUtilization > 90;
+
+            // 手入力起点でない場合は手入力値をリセット
+            if (!fromManualInput) {
+                manualRobotCount = null;
+            }
+
+            // 自動算出値と手入力値のどちらを採用するか決定
+            if (manualRobotCount !== null && manualRobotCount > 0) {
+                totalRecommend = manualRobotCount;
+            } else {
+                totalRecommend = autoCalculatedRecommend;
+            }
+
+            // 最終的な totalRecommend に基づき稼働率と充電台数を算出
+            // 充電台数は理論台数を基準に計算し、推奨投入とは無関係
+            if (isWorkCharging) {
+                // 充電台数 = 理論台数 × (1/充放比)
+                chargingCount = totalTheory / chargeRatio;
+                // 稼働率 = 理論台数 / (推奨投入 - 充電台数) × 100%
+                const workingRobots = totalRecommend - chargingCount;
+                utilization = workingRobots > 0 ? (totalTheory / workingRobots) * 100 : 0;
+            } else {
+                // 充電台数 = 0
+                chargingCount = 0;
+                // 稼働率 = 理論台数 / 推奨投入 × 100%
+                utilization = totalRecommend > 0 ? (totalTheory / totalRecommend) * 100 : 0;
+            }
+
+            // 入力欄の編集可否を設定
+            setRobotInputEditable(allowManualInput);
+
+            // Calculate per-row recommend based on proportion
+            rows.forEach((row, index) => {
+                const { data, result } = rowResults[index];
+                // 理論台数の比率で推奨投入を配分
+                const rowRecommend = totalTheory > 0
+                    ? Math.ceil(result.theoryCount / totalTheory * totalRecommend)
+                    : 0;
+
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${data.route}</td>
+                        <td>${result.pickPutTime}</td>
+                        <td>${result.liftTime}</td>
+                        <td>${result.commTime}</td>
+                        <td>${result.palletTime}</td>
+                        <td>${result.runTime}</td>
+                        <td>${result.turnTime}</td>
+                        <td>${result.dockTime}</td>
+                        <td>${result.trafficTime}</td>
+                        <td><strong>${result.totalTime}</strong></td>
+                        <td>${result.capacity.toFixed(2)}</td>
+                        <td>${result.theoryCount.toFixed(2)}</td>
+                        <td><strong>${rowRecommend}</strong></td>
+                    </tr>
+                `;
+            });
+
+            resultBody.innerHTML = html;
+            resultFoot.style.display = '';
+
+            document.getElementById('footCapacity').textContent = totalCapacity.toFixed(2);
+            document.getElementById('footTheory').textContent = totalTheory.toFixed(2);
+            document.getElementById('footRecommend').textContent = totalRecommend;
+
+            updateSummary(totalRecommend, totalCapacity, chargingCount, utilization);
+        }
+
+        // Update summary cards
+        function updateSummary(robots, capacity, charging, utilization) {
+            document.getElementById('totalRobots').value = robots;
+            document.getElementById('totalCapacity').textContent = capacity.toFixed(2);
+            // 充電台数：不要な末尾のゼロを削除（1.5は1.5表示）
+            document.getElementById('totalCharging').textContent = parseFloat(charging.toFixed(2));
+            document.getElementById('totalUtilization').textContent = utilization ? utilization.toFixed(1) : '0';
+        }
+
+        // 推奨投入入力欄の編集可否を設定
+        function setRobotInputEditable(editable) {
+            const robotInput = document.getElementById('totalRobots');
+            const editableHint = document.getElementById('editableHint');
+
+            if (editable) {
+                robotInput.removeAttribute('readonly');
+                editableHint.style.display = 'inline';
+            } else {
+                robotInput.setAttribute('readonly', true);
+                editableHint.style.display = 'none';
+            }
+        }
+
+        // ユーザー手入力の推奨投入値を処理
+        function onManualRobotInput() {
+            const robotInput = document.getElementById('totalRobots');
+            const value = parseInt(robotInput.value, 10);
+
+            if (!isNaN(value) && value > 0) {
+                manualRobotCount = value;
+                calculateAll(true); // 手入力起点のため manualRobotCount をリセットしない
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderRobotCards();
+            addFlowRow();
+
+            // Search input listener
+            const searchInput = document.getElementById('robotSearch');
+            searchInput.addEventListener('input', handleSearch);
+
+            // Scroll listener for indicators
+            const grid = document.getElementById('robotGrid');
+            grid.addEventListener('scroll', updateScrollIndicators);
+
+            // Initial scroll indicator update
+            setTimeout(updateScrollIndicators, 100);
+        });
+
+        // Close modal on outside click
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Open formula modal
+        function openFormulaModal() {
+            document.getElementById('editPickPutTime').value = formulaConfigs.pickPutTimePerAction;
+            document.getElementById('editCommTime').value = formulaConfigs.commTimePerAction;
+            document.getElementById('editPalletRecogTime').value = formulaConfigs.palletRecogTime;
+            document.getElementById('editTurnTime').value = formulaConfigs.turnTimePerTurn;
+            document.getElementById('editDockTime').value = formulaConfigs.dockTimePerDock;
+            document.getElementById('formulaModal').classList.add('active');
+        }
+
+        // Close formula modal
+        function closeFormulaModal() {
+            document.getElementById('formulaModal').classList.remove('active');
+        }
+
+        // Handle formula form submit
+        document.getElementById('formulaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            formulaConfigs = {
+                pickPutTimePerAction: parseFloat(document.getElementById('editPickPutTime').value),
+                commTimePerAction: parseFloat(document.getElementById('editCommTime').value),
+                palletRecogTime: parseFloat(document.getElementById('editPalletRecogTime').value),
+                turnTimePerTurn: parseFloat(document.getElementById('editTurnTime').value),
+                dockTimePerDock: parseFloat(document.getElementById('editDockTime').value)
+            };
+            localStorage.setItem('formulaConfigs', JSON.stringify(formulaConfigs));
+            closeFormulaModal();
+            calculateAll();
+        });
+
+        // Close formula modal on outside click
+        document.getElementById('formulaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFormulaModal();
+            }
+        });
+    </script>
+</body>
+</html>
