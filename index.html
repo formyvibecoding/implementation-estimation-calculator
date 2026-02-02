@@ -51,6 +51,27 @@
             opacity: 0.9;
         }
 
+        .manual-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 18px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .manual-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -113,12 +134,36 @@
             font-size: 12px;
             color: var(--text-secondary);
         }
+
+        .manual-section {
+            margin-top: 32px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .manual-section h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .manual-section ol {
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .manual-section li {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <h1>机器人数量测算系统</h1>
         <p>请选择语言版本进入系统</p>
+        <a class="manual-button" href="#manual">マニュアル</a>
     </header>
 
     <main class="container">
@@ -135,6 +180,17 @@
                 <div class="lang-action">システムへ →</div>
             </a>
         </div>
+        <section id="manual" class="manual-section">
+            <h2>営業向け かんたんマニュアル（日本語）</h2>
+            <ol>
+                <li>「日本語版」をクリックして、計算画面を開きます。</li>
+                <li>お客様名・案件名など、基本情報を入力します。</li>
+                <li>工程ごとの作業時間や数量を、わかる範囲で記入します。</li>
+                <li>入力が終わったら「計算」ボタンを押します。</li>
+                <li>表示された必要台数・効果を、そのまま提案資料に使えます。</li>
+                <li>必要なら画面をスクリーンショットして、社内共有します。</li>
+            </ol>
+        </section>
         <p class="footer">Robot Calculator System v1.4.1</p>
     </main>
 </body>
